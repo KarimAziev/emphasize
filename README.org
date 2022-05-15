@@ -10,7 +10,7 @@ Download repository and it to your load path in your init file:
 
 (add-to-list 'load-path "/path/to/emphasize/")
 
-(require emphasize')
+(require 'emphasize)
 
 #+end_src
 
@@ -19,7 +19,7 @@ Download repository and it to your load path in your init file:
 #+begin_src elisp :eval no
 
 (use-package emphasize
-  :straight (:repo "KarimAziev/emphasize":type git :host github))
+  :straight (:repo "KarimAziev/emphasize" :type git :host github))
 
 #+end_src
 
