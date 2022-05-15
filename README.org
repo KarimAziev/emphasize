@@ -1,0 +1,37 @@
+* emphasize
+
+** Installation
+
+*** Manually
+
+Download repository and it to your load path in your init file:
+
+#+begin_src elisp :eval no
+
+(add-to-list 'load-path "/path/to/emphasize/")
+
+(require emphasize')
+
+#+end_src
+
+*** With use-package and straight
+
+#+begin_src elisp :eval no
+
+(use-package emphasize
+  :straight (:repo "KarimAziev/emphasize":type git :host github))
+
+#+end_src
+
+** Commands
+
++ ~emphasize-thing-at-point~
+Emphasize thing at point or active region. You can customize which chars to insert with ~emphasize-modes-alist~, and which chars to use to guess thing at point - with ~emphasize-thing-at-point-chars~.
+
+** Customization
+
++ ~emphasize-thing-at-point-chars~
+Alist of major modes and regexp of thing to wrap.
+
++ ~emphasize-modes-alist~
+Aist of major modes and corresponding chars to insert before and after.
