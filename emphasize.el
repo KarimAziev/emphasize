@@ -44,8 +44,6 @@
 
 ;;; Code:
 
-
-
 (defcustom emphasize-modes-alist '((org-mode
                                     ("~" . "~")
                                     ("*" . "*")
@@ -155,7 +153,7 @@ and which chars to use to guess thing at point - with
 `emphasize-thing-at-point-chars'."
   (interactive)
   (emphasize-read (or (alist-get major-mode emphasize-modes-alist)
-                      '("\"" . "\""))
+                      '(("\"" . "\"")))
                   (or (alist-get major-mode emphasize-thing-at-point-chars)
                       "-\"'$A-Za-zА-Яа-я0-9:.")))
 
