@@ -73,16 +73,16 @@
 (defun emphasize-read (chars-alist word-re)
   "Emphasize thing at point that matches WORD-RE with CHARS-ALIST.
 CHARS-ALIST is alist of opened and closed chars to insert."
-  (let ((open-chars (mapcar 'car chars-alist))
-        (closed-chars (mapcar 'cdr chars-alist))
+  (let ((open-chars (mapcar #'car chars-alist))
+        (closed-chars (mapcar #'cdr chars-alist))
         (bounds)
         (word)
         (variants))
     (setq word-re
           (replace-regexp-in-string
-           (mapconcat 'regexp-quote
+           (mapconcat #'regexp-quote
                       (seq-uniq (seq-remove
-                                 'string-empty-p
+                                 #'string-empty-p
                                  (append open-chars closed-chars)))
                       "\\|")
            ""
@@ -114,7 +114,7 @@ CHARS-ALIST is alist of opened and closed chars to insert."
                          (cdr bounds)))
              (setq variants (mapcar (lambda (it) (concat (car it) word (cdr it)))
                                     chars-alist)))
-            ((looking-at (mapconcat 'regexp-quote open-chars "\\|"))
+            ((looking-at (mapconcat #'regexp-quote open-chars "\\|"))
              (let ((open-char (match-string-no-properties 0))
                    (beg (point))
                    (end)
@@ -126,7 +126,7 @@ CHARS-ALIST is alist of opened and closed chars to insert."
                (skip-chars-forward word-re)
                (setq w-end (point))
                (setq word (buffer-substring-no-properties w-beg w-end))
-               (when (looking-at (mapconcat 'regexp-quote closed-chars "\\|"))
+               (when (looking-at (mapconcat #'regexp-quote closed-chars "\\|"))
                  (setq closed-char (match-string-no-properties 0))
                  (setq end (+ (point) (length closed-char)))
                  (setq bounds (cons beg end))
