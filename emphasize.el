@@ -22,6 +22,7 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 
 ;; This file configures operations with emphasize
@@ -43,6 +44,8 @@
 ;;      Aist of major modes and corresponding chars to insert before and after.
 
 ;;; Code:
+
+(require 'subr-x)
 
 (defcustom emphasize-modes-alist '((org-mode
                                     ("~" . "~")
@@ -146,6 +149,7 @@ CHARS-ALIST is alist of opened and closed chars to insert."
         (replace-region-contents (car bounds) (cdr bounds)
                                  (lambda () choice))))))
 
+;;;###autoload
 (defun emphasize-thing-at-point ()
   "Emphasize thing at point or active region.
 You can customize which chars to insert with `emphasize-modes-alist',
