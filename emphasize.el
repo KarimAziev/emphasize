@@ -60,10 +60,15 @@
                                     ("'" . "")
                                     ("\"" . "\"")))
   "Aist of major modes and corresponding chars to insert before and after."
-  :type '(alist :key-type (symbol :tag "Major mode")
-                :value-type (alist
-                             :key-type (string :tag "Open char")
-                             :value-type (string :tag "Closed char")))
+  :type '(alist
+          :key-type (symbol :tag "Major mode")
+          :value-type
+          (repeat
+           (choice
+            (cons :tag "Chars"
+                  (string :tag "Left")
+                  (string :tag "Right"))
+            (function :tag "Function"))))
   :group 'emphasize)
 
 (defcustom emphasize-thing-at-point-chars '((org-mode . "-\"'/$A-Za-zА-Яа-я0-9:.")
@@ -73,11 +78,23 @@
                 :value-type (regexp :tag "Regexp"))
   :group 'emphasize)
 
+(defun emphasize-map-variants (word chars-alist)
+  "Map variants of WORD from CHARS-ALIST."
+  (remove nil
+          (mapcar (lambda (it)
+                    (if (functionp it)
+                        (funcall it word)
+                      (when (consp it)
+                        (concat (or (car it) "")
+                                word
+                                (or (cdr it) "")))))
+                  chars-alist)))
+
 (defun emphasize-read (chars-alist word-re)
   "Emphasize thing at point that matches WORD-RE with CHARS-ALIST.
 CHARS-ALIST is alist of opened and closed chars to insert."
-  (let ((open-chars (mapcar #'car chars-alist))
-        (closed-chars (mapcar #'cdr chars-alist))
+  (let ((open-chars (mapcar #'car (seq-remove 'functionp chars-alist)))
+        (closed-chars (mapcar #'cdr (seq-remove 'functionp chars-alist)))
         (bounds)
         (word)
         (variants))
@@ -99,10 +116,7 @@ CHARS-ALIST is alist of opened and closed chars to insert."
              (setq word (buffer-substring-no-properties
                          (car bounds)
                          (cdr bounds)))
-             (setq variants (mapcar (lambda (it) (concat (car it)
-                                                    word
-                                                    (cdr it)))
-                                    chars-alist)))
+             (setq variants (emphasize-map-variants word chars-alist)))
             ((looking-at (concat "[" word-re "]"))
              (setq bounds
                    (cons
@@ -115,8 +129,7 @@ CHARS-ALIST is alist of opened and closed chars to insert."
              (setq word (buffer-substring-no-properties
                          (car bounds)
                          (cdr bounds)))
-             (setq variants (mapcar (lambda (it) (concat (car it) word (cdr it)))
-                                    chars-alist)))
+             (setq variants (emphasize-map-variants word chars-alist)))
             ((looking-at (mapconcat #'regexp-quote open-chars "\\|"))
              (let ((open-char (match-string-no-properties 0))
                    (beg (point))
@@ -131,14 +144,18 @@ CHARS-ALIST is alist of opened and closed chars to insert."
                (setq word (buffer-substring-no-properties w-beg w-end))
                (when (looking-at (mapconcat #'regexp-quote closed-chars "\\|"))
                  (setq closed-char (match-string-no-properties 0))
-                 (setq end (+ (point) (length closed-char)))
+                 (setq end (+ (point)
+                              (length closed-char)))
                  (setq bounds (cons beg end))
-                 (let ((el (seq-find (lambda (it) (and (equal (car it) open-char)
-                                                  (equal (cdr it) closed-char)))
+                 (let ((el (seq-find (lambda (it)
+                                       (when (consp it)
+                                         (and (equal (car it) open-char)
+                                              (equal (cdr it) closed-char))))
                                      chars-alist)))
-                   (setq variants (mapcar (lambda (it) (concat
-                                                   (car it) word (cdr it)))
-                                          (remove el chars-alist)))
+                   (setq variants
+                         (emphasize-map-variants word
+                                                 (remove el
+                                                         chars-alist)))
                    (setq variants (push word variants))))))))
     (when (and variants bounds)
       (let ((choice (completing-read (format "Replace %s with:"
@@ -146,7 +163,8 @@ CHARS-ALIST is alist of opened and closed chars to insert."
                                               (car bounds)
                                               (cdr bounds)))
                                      variants)))
-        (replace-region-contents (car bounds) (cdr bounds)
+        (replace-region-contents (car bounds)
+                                 (cdr bounds)
                                  (lambda () choice))))))
 
 ;;;###autoload
