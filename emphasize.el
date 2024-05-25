@@ -71,11 +71,12 @@
             (function :tag "Function"))))
   :group 'emphasize)
 
-(defcustom emphasize-thing-at-point-chars '((org-mode . "-\"'/$A-Za-zА-Яа-я0-9:.")
-                                            (emacs-lisp-mode . "-\"'/$A-Za-z0-9:."))
+(defcustom emphasize-thing-at-point-chars '((org-mode . "-\"'\\$A-Za-zА-Яа-я0-9:.")
+                                            (emacs-lisp-mode . "-\"'\\$A-Za-z0-9:."))
   "Alist of major modes and regexp of thing to wrap."
-  :type '(alist :key-type (symbol :tag "Major mode")
-                :value-type (regexp :tag "Regexp"))
+  :type '(alist
+          :key-type (symbol :tag "Major mode")
+          :value-type (regexp :tag "Regexp"))
   :group 'emphasize)
 
 (defun emphasize-map-variants (word chars-alist)
@@ -90,15 +91,15 @@
                                 (or (cdr it) "")))))
                   chars-alist)))
 
-(defun emphasize-read (chars-alist word-re)
-  "Emphasize thing at point that matches WORD-RE with CHARS-ALIST.
+(defun emphasize-read (chars-alist word-chars)
+  "Emphasize thing at point that matches WORD-RE with WORD-CHARS.
 CHARS-ALIST is alist of opened and closed chars to insert."
   (let ((open-chars (mapcar #'car (seq-remove 'functionp chars-alist)))
         (closed-chars (mapcar #'cdr (seq-remove 'functionp chars-alist)))
         (bounds)
         (word)
         (variants))
-    (setq word-re
+    (setq word-chars
           (replace-regexp-in-string
            (mapconcat #'regexp-quote
                       (seq-uniq (seq-remove
@@ -106,7 +107,7 @@ CHARS-ALIST is alist of opened and closed chars to insert."
                                  (append open-chars closed-chars)))
                       "\\|")
            ""
-           word-re))
+           word-chars))
     (save-excursion
       (cond ((and (region-active-p)
                   (use-region-p))
@@ -117,14 +118,14 @@ CHARS-ALIST is alist of opened and closed chars to insert."
                          (car bounds)
                          (cdr bounds)))
              (setq variants (emphasize-map-variants word chars-alist)))
-            ((looking-at (concat "[" word-re "]"))
+            ((looking-at (concat "[" word-chars "]"))
              (setq bounds
                    (cons
                     (save-excursion
-                      (skip-chars-backward word-re)
+                      (skip-chars-backward word-chars)
                       (point))
                     (save-excursion
-                      (skip-chars-forward word-re)
+                      (skip-chars-forward word-chars)
                       (point))))
              (setq word (buffer-substring-no-properties
                          (car bounds)
@@ -139,7 +140,7 @@ CHARS-ALIST is alist of opened and closed chars to insert."
                    (closed-char))
                (forward-char (length open-char))
                (setq w-beg (point))
-               (skip-chars-forward word-re)
+               (skip-chars-forward word-chars)
                (setq w-end (point))
                (setq word (buffer-substring-no-properties w-beg w-end))
                (when (looking-at (mapconcat #'regexp-quote closed-chars "\\|"))
@@ -177,7 +178,7 @@ and which chars to use to guess thing at point - with
   (emphasize-read (or (alist-get major-mode emphasize-modes-alist)
                       '(("\"" . "\"")))
                   (or (alist-get major-mode emphasize-thing-at-point-chars)
-                      "-\"'$A-Za-zА-Яа-я0-9:.")))
+                      "-\"'\\$A-Za-zА-Яа-я0-9:.")))
 
 (provide 'emphasize)
 ;;; emphasize.el ends here
