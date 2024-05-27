@@ -1,4 +1,4 @@
-;;; emphasize.el --- Configure emphasize -*- lexical-binding: t -*-
+;;; emphasize.el --- Emphasize text in various modes -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022 Karim Aziiev <karim.aziiev@gmail.com>
 
@@ -24,8 +24,6 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
-;; This file configures operations with emphasize
 
 ;; Commands
 
